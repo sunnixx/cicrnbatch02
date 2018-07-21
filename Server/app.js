@@ -1,29 +1,35 @@
-const express = require('express') //Import library express
+const express = require('express');
+const bodyParser = require('body-parser');
 
-const app = express(); //Object of class Express
+const app = express();
 
-const arrJson = [
-    {"name" : "John Doe"},
-    {"name" : "Sumair Hamza"}
-]
+//Middleware 
+app.use(bodyParser.json()); //Always take data in JSON format
+app.use(bodyParser.urlencoded({extended: false})); //Never encode the URL 
 
+//Routes
 app.get('/',(request,response) => {
-    //request -> When you're requesting something from the Client
-    //Response -> When you're responding to client request
+    response.send("Server connecteD");
+})
 
-    // '/' -> http://localhost:3000 (Default URL)
+app.post('/',(request,response) => {
+    // let data = request.body.data;
+    console.log(request.body);
+    let data = request.body.msg;
+    response.json({msg: 'Got the Data'});
+})
 
-    response.send("Hello World");
-});
-
-app.get('/batman',(request,response) => {
-    response.send({
-        "msg" : "I am batman"
+app.get('/showInfo',(request,response) => {
+    response.json({
+        "employee": {
+            "name" : "John Doe",
+            "designation" : "Engineer"
+        }
     });
 })
 
-app.get('/readJson',(request,response) => {
-    response.send(arrJson);
-})
+app.listen(3000,(err) => {
+    if(err) throw err //Let me know what the error is
 
-app.listen(5000); //Listen to the port of the server
+    console.log("Server connected");
+})

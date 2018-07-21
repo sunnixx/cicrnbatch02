@@ -1,104 +1,65 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ToastAndroid } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, AsyncStorage } from 'react-native';
 
-import  app  from './API';
+import app from './API';
 
 export default class extends Component {
 
   constructor(props) {
-    super(props); //Import all methods from Component Class
+    super(props);
+    this.data = ''; //Class variable in JavaScript
 
-    //States
-    this.state = { title: 'Todo App', item: '', items: [] }
+    this.state = { employee: [], dummy: true }
 
-    this.handleLogin = this.handleLogin.bind(this); //Bind this method to the main class tree of React
-    this.handleChange = this.handleChange.bind(this);
-    // this.getDataFromServer = this.getDataFromServer.bind(this);
+    this.handleData = this.handleData.bind(this);
+    this.getData = this.getData.bind(this);
   }
 
-  handleLogin() {
-    if (this.state.item !== '') {
-      let item = this.state.item;
-
-      this.state.items.push({
-        "item": item
-      });
-
-      this.setState({ item: '' })
-    } else {
-      ToastAndroid.show('Item text field cannot be empty', ToastAndroid.SHORT);
-    }
+  handleData() {
+    app.handleData(this.data);
   }
 
-  handleChange() {
-
+  getData() {
+    app.getData();
   }
 
   componentDidMount() {
-    //This function will run after the component has been loaded 
-    app.load();
+    //This method runs after the render() method
+    if (AsyncStorage.getItem !== null) {
+      AsyncStorage.getItem('key:employee')
+        .then(response => {
+          this.state.employee.push(JSON.parse(response));
+          this.setState({dummy: false})
+        });
+    }
   }
 
   render() {
     return (
-      <View style={Styles.container}>
-        <Text style={Styles.title}>
-          {this.state.title}
-        </Text>
+      <View>
         <TextInput
-          placeholder="Write Todo Item"
-          style={Styles.textInput}
-          onChangeText={(text) => { this.state.item = text }}
+          placeholder="Enter anything"
+          style={{ width: '100%' }}
+          onChangeText={(e) => { this.data = e }}
         />
-
         <TouchableOpacity
-          onPress={this.handleLogin}
-          style={Styles.button}
+          onPress={this.handleData}
         >
-          <Text style={Styles.btnText}> Add </Text>
+          <Text>Click </Text>
         </TouchableOpacity>
-        <View>
-          {this.state.items.map((item, index) => {
-            return (
-              <View key={"view" + index}>
-                <Text key={"text" + index}>{item.item}</Text>
-              </View>
+
+        <TouchableOpacity onPress={this.getData}>
+          <Text>CLICK FOR INFORMATION</Text>
+        </TouchableOpacity>
+        {this.state.employee.map((emp,index) => {
+          return (
+            <View key={"view" + index}>
+              <Text key={"textname" + index}>{emp.employee.name}</Text>
+              <Text key={"textdesignation" + index}>{emp.employee.designation}</Text>
+            </View>
             )
-          })}
-        </View>
+        })}
       </View>
     )
   }
 }
-
-const Styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: 'column',
-    backgroundColor: '#fafafa',
-    height: '100%'
-  },
-  title: {
-    fontSize: 30,
-    color: '#222222'
-  },
-  text: {
-    fontSize: 20
-  },
-  textInput: {
-    width: '100%'
-  },
-  btnText: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontSize: 20
-  },
-  button: {
-    borderRadius: 50,
-    backgroundColor: '#e3e3e3',
-    padding: 20,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center'
-  }
-})
